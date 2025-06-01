@@ -13,7 +13,9 @@ import sys
 import time
 import pandas as pd
 import plotly.express as px
+
 from modules.rrc import rrc_filter
+from modules.clock_sync import polyphase_clock_sync
 
 # Import lokalnego modułu RRC
 sys.path.append ( "modules" )
@@ -34,10 +36,13 @@ NUM_POINTS = 16384
 SPS = 4
 GAIN_CONTROL = "fast_attack"
 #GAIN_CONTROL = "manual"
+
 # Parametry filtru RRC
 RRC_BETA = 0.35 # Excess_bw
 RRC_SPS = SPS   # Samples per symbol
 RRC_SPAN = 11
+
+NFILTS = 32
 
 # Inicjalizacja Pluto SDR
 sdr = adi.Pluto ( uri = "usb:" )
@@ -70,12 +75,12 @@ try :
         if keyboard.is_pressed ('esc') :
             print ( "Naciśnięto Esc. Kończę zbieranie." )
             break
-
         raw_samples = sdr.rx ()
         filtered_samples = lfilter ( rrc_taps , 1.0 , raw_samples )
         ts = time.time () - t0
+        synced_samples = polyphase_clock_sync ( filtered_samples , sps = SPS, nfilts = NFILTS , excess_bw = RRC_BETA )
         if verbose : acg_vaule = sdr._get_iio_attr ( 'voltage0' , 'hardwaregain' , False ) ; print ( f"{acg_vaule=}" )
-        for sample in filtered_samples :
+        for sample in synced_samples :
             csv_writer_filtered.writerow ( [ ts , sample.real , sample.imag ] )
         csv_file_filtered.flush ()
         if verbose : print ( f"{type ( filtered_samples )=}, {filtered_samples.dtype=}" ) ; print ( f"{filtered_samples=}" )
