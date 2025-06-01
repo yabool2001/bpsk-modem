@@ -53,11 +53,11 @@ if verbose : help ( adi.Pluto.rx_output_type ) ; help ( adi.Pluto.gain_control_m
 # Inicjalizacja pliku CSV
 csv_filename_raw = "complex_rx_raw.csv"
 csv_filename_filtered = "complex_rx_filtered.csv"
-csv_file_raw = open ( csv_filename_raw , mode = "w" , newline = '' )
+#csv_file_raw = open ( csv_filename_raw , mode = "w" , newline = '' )
 csv_file_filtered = open ( csv_filename_filtered , mode = "w" , newline = '' )
-csv_writer_raw = csv.writer ( csv_file_raw )
+#csv_writer_raw = csv.writer ( csv_file_raw )
 csv_writer_filtered = csv.writer ( csv_file_filtered )
-csv_writer_raw.writerow ( [ "timestamp" , "real" , "imag" ] )
+#csv_writer_raw.writerow ( [ "timestamp" , "real" , "imag" ] )
 csv_writer_filtered.writerow ( [ "timestamp" , "real" , "imag" ] )
 
 # Inicjalizacja filtry RRC
