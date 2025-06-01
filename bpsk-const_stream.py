@@ -18,16 +18,11 @@ CYCLE = 0            # opóźnienie między pakietami [ms]; <0 = liczba powtórz
 
 # ------------------------ DANE DO MODULACJI ------------------------
 header = [ 0xAA , 0xAA , 0xAA , 0xAA ]
-payload = [ 0x0F , 0x0F , 0x0F , 0x0F ]  # można zmieniać dynamicznie
+# payload = [ 0x0F , 0x0F , 0x0F , 0x0F ]  # można zmieniać dynamicznie
+payload = [ 0x0F ]  # można zmieniać dynamicznie
 
-def create_packet(header, payload):
-    length_byte = [len(payload) - 1]
-    crc32 = zlib.crc32(bytes(payload))
-    crc_bytes = list(crc32.to_bytes(4, 'big'))
-    return header + length_byte + payload + crc_bytes
-
-def bits_to_bpsk(bits):
-    return np.array([1.0 if bit else -1.0 for bit in bits], dtype=np.float32)
+def bits_to_bpsk ( bits ) :
+    return np.array ( [1.0 if bit else -1.0 for bit in bits] , dtype = np.float32 )
 
 def rrc_filter(beta, sps, span):
     N = sps * span
@@ -38,8 +33,8 @@ def rrc_filter(beta, sps, span):
     return taps
 
 def modulate_packet(packet, sps, beta, span):
-    bits = np.unpackbits(np.array(packet, dtype=np.uint8))
-    symbols = bits_to_bpsk(bits)
+    bits = np.unpackbits ( np.array ( packet , dtype = np.uint8 ) )
+    symbols = bits_to_bpsk ( bits )
     rrc = rrc_filter(beta, sps, span)
     shaped = upfirdn(rrc, symbols, up=sps)
     return (shaped + 0j).astype(np.complex64)
@@ -71,8 +66,7 @@ def transmit_loop(waveform, cycle_ms, sdr):
 
 # ------------------------ KONFIGURACJA SDR ------------------------
 def main():
-    packet = create_packet ( header , payload )
-    waveform = modulate_packet ( packet , SPS , RRC_BETA , RRC_SPAN )
+    waveform = modulate_packet ( payload , SPS , RRC_BETA , RRC_SPAN )
 
 # Inicjalizacja Pluto SDR
     sdr = adi.Pluto ( uri = "usb:" )

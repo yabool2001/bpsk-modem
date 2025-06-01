@@ -29,7 +29,8 @@ RX_GAIN = 0.1
 
 # Parametry RF 
 F_C = 2_900_000_000
-F_S = 521_100
+#F_S = 521_100
+F_S = 3_000_000
 BW  = 1_000_000
 NUM_SAMPLES = 32768
 NUM_POINTS = 16384
@@ -45,7 +46,7 @@ RRC_SPAN = 11
 NFILTS = 32
 
 # Inicjalizacja Pluto SDR
-sdr = adi.Pluto ( uri = "usb:" )
+sdr = adi.Pluto ( uri = "ip:192.168.2.1" )
 sdr.rx_lo = int ( F_C )
 sdr.sample_rate = int ( F_S )
 sdr.rx_rf_bandwidth = int ( BW )
@@ -109,3 +110,25 @@ fig.update_layout(
     height=500
 )
 fig.show()
+
+# Wczytanie danych i wyświetlenie wykresu w Plotly
+print ( "Rysuję wykres..." )
+
+# Wykres Plotly Express – wersja liniowa z filtrem
+fig = px.line(df, x="timestamp", y="real", title="Sygnał BPSK po filtracji RRC I i Q na osi czasu")
+fig.add_scatter(x=df["timestamp"], y=df["imag"], mode="markers", name="Q (imag filtrowane)", line=dict(dash="dash"))
+
+fig.update_layout(
+    xaxis_title="Czas względny [s]",
+    yaxis_title="Amplituda",
+    xaxis=dict(
+        rangeslider_visible=True
+    ),
+    yaxis=dict(
+        autorange=True
+    ),
+    legend=dict(x=0.01, y=0.99)
+)
+
+
+fig.show ()
