@@ -77,7 +77,7 @@ def main():
     sdr.tx_cyclic_buffer = False
     sdr.tx_hardwaregain_chan0 = float ( -TX_ATTENUATION )
 
-    print ( f"Nadawanie pakietu: {packet}" )
+    print ( f"Nadawanie pakietu: {payload}" )
     transmit_loop ( waveform , CYCLE , sdr )
 
 if __name__ == "__main__":
