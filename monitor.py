@@ -21,8 +21,8 @@ from modules.clock_sync import polyphase_clock_sync
 sys.path.append ( "modules" )
 
 # App settings
-#verbose = True
-verbose = False
+verbose = True
+#verbose = False
 
 # Parametry SDR
 RX_GAIN = 0.1
@@ -53,17 +53,18 @@ sdr.rx_rf_bandwidth = int ( BW )
 sdr.rx_buffer_size = int ( NUM_SAMPLES )
 sdr.gain_control_mode_chan0 = GAIN_CONTROL
 sdr.rx_hardwaregain_chan0 = float ( RX_GAIN )
-sdr.rx_output_type = "SI"
+#sdr.rx_output_type = "SI"
+sdr.rx_output_type = "raw"
 if verbose : help ( adi.Pluto.rx_output_type ) ; help ( adi.Pluto.gain_control_mode_chan0 ) ; help ( adi.Pluto.tx_lo ) ; help ( adi.Pluto.tx  )
 
 # Inicjalizacja pliku CSV
 csv_filename_raw = "complex_rx_raw.csv"
 csv_filename_filtered = "complex_rx_filtered.csv"
-#csv_file_raw = open ( csv_filename_raw , mode = "w" , newline = '' )
+csv_file_raw = open ( csv_filename_raw , mode = "w" , newline = '' )
 csv_file_filtered = open ( csv_filename_filtered , mode = "w" , newline = '' )
-#csv_writer_raw = csv.writer ( csv_file_raw )
+csv_writer_raw = csv.writer ( csv_file_raw )
 csv_writer_filtered = csv.writer ( csv_file_filtered )
-#csv_writer_raw.writerow ( [ "timestamp" , "real" , "imag" ] )
+csv_writer_raw.writerow ( [ "timestamp" , "real" , "imag" ] )
 csv_writer_filtered.writerow ( [ "timestamp" , "real" , "imag" ] )
 
 # Inicjalizacja filtry RRC
@@ -78,9 +79,13 @@ try :
             break
         raw_samples = sdr.rx ()
         filtered_samples = lfilter ( rrc_taps , 1.0 , raw_samples )
-        ts = time.time () - t0
         synced_samples = polyphase_clock_sync ( filtered_samples , sps = SPS, nfilts = NFILTS , excess_bw = RRC_BETA )
+        ts = time.time () - t0
         if verbose : acg_vaule = sdr._get_iio_attr ( 'voltage0' , 'hardwaregain' , False ) ; print ( f"{acg_vaule=}" )
+        for sample in raw_samples :
+            csv_writer_raw.writerow ( [ ts , sample.real , sample.imag ] )
+        csv_file_raw.flush ()
+        if verbose : print ( f"{type ( raw_samples )=}, {raw_samples.dtype=}" ) ; print ( f"{raw_samples=}" )
         for sample in synced_samples :
             csv_writer_filtered.writerow ( [ ts , sample.real , sample.imag ] )
         csv_file_filtered.flush ()
