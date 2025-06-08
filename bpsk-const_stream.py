@@ -6,15 +6,25 @@ from scipy.signal import upfirdn
 
 
 # ------------------------ PARAMETRY KONFIGURACJI ------------------------
-F_C = 2_900_000_000     # częstotliwość nośna [Hz]
-#F_S = 521_100           # częstotliwość próbkowania [Hz]
+F_C = 2_400_000_000     # częstotliwość nośna [Hz]
+F_S = 521_100           # częstotliwość próbkowania [Hz]
 F_S = 3_000_000           # częstotliwość próbkowania [Hz]
 SPS = 4                 # próbek na symbol
-TX_ATTENUATION = 10.0   # tłumienie TX [dB]
+TX_ATTENUATION = 1.0   # tłumienie TX [dB]
 BW = 1_000_000          # szerokość pasma [Hz]
 RRC_BETA = 0.35         # roll-off factor
 RRC_SPAN = 11           # długość filtru RRC w symbolach
-CYCLE = 0            # opóźnienie między pakietami [ms]; <0 = liczba powtórzeń
+CYCLE = 10            # opóźnienie między pakietami [ms]; <0 = liczba powtórzeń
+
+# Inicjalizacja Pluto SDR
+#sdr = adi.Pluto ( uri = "usb:" )
+sdr = adi.Pluto ( uri = "ip:192.168.2.1" )
+sdr.tx_destroy_buffer()
+sdr.sample_rate = int ( F_S )
+sdr.tx_rf_bandwidth = int ( BW )
+sdr.tx_lo = int ( F_C )
+sdr.tx_cyclic_buffer = False
+sdr.tx_hardwaregain_chan0 = float ( -TX_ATTENUATION )
 
 # ------------------------ DANE DO MODULACJI ------------------------
 header = [ 0xAA , 0xAA , 0xAA , 0xAA ]
@@ -67,17 +77,7 @@ def transmit_loop(waveform, cycle_ms, sdr):
 # ------------------------ KONFIGURACJA SDR ------------------------
 def main():
     waveform = modulate_packet ( payload , SPS , RRC_BETA , RRC_SPAN )
-
-# Inicjalizacja Pluto SDR
-    sdr = adi.Pluto ( uri = "usb:" )
-    sdr.tx_destroy_buffer()
-    sdr.sample_rate = int ( F_S )
-    sdr.tx_rf_bandwidth = int ( BW )
-    sdr.tx_lo = int ( F_C )
-    sdr.tx_cyclic_buffer = False
-    sdr.tx_hardwaregain_chan0 = float ( -TX_ATTENUATION )
-
-    print ( f"Nadawanie pakietu: {packet}" )
+    print ( f"Nadawanie pakietu: {waveform}" )
     transmit_loop ( waveform , CYCLE , sdr )
 
 if __name__ == "__main__":

@@ -28,9 +28,9 @@ verbose = False
 RX_GAIN = 0.1
 
 # Parametry RF 
-F_C = 2_900_000_000
+F_C = 2_000_000_000
 #F_S = 521_100
-F_S = 3_000_000
+F_S = 30_000_000
 BW  = 1_000_000
 NUM_SAMPLES = 32768
 NUM_POINTS = 16384
@@ -111,6 +111,7 @@ fig.update_layout(
 )
 fig.show()
 
+'''
 # Wczytanie danych i wyświetlenie wykresu w Plotly
 print ( "Rysuję wykres..." )
 
@@ -132,3 +133,4 @@ fig.update_layout(
 
 
 fig.show ()
+'''
